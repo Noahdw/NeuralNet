@@ -24,23 +24,29 @@ namespace forfun
             List<double> randWeights = new List<double>();
             if ((position + 1) < numLayers.Count)
             {
-                for (int r = 0; r < numLayers[position + 1]; r++)
+
+                for (int i = 0; i < numLayers[position]; i++)
                 {
-                    randWeights.Add(rand.NextDouble());
+
+                    if (position == 0)
+                    {
+
+                        neurons.Add(new Neuron(inputs[i], Neuron.RandomWeights(numLayers[position])));
+                    }
+                    else
+                        neurons.Add(new Neuron(Neuron.RandomWeights(numLayers[position])));
                 }
+            }
+            else
+            {
+                for (int i = 0; i < numLayers[position]; i++)
+                {
+                    neurons.Add(new Neuron());
+                }
+               
             }
          
 
-            for (int i = 0; i < numLayers[position]; i++)
-            {
-            
-                if (position == 0)
-                {
-                    neurons.Add(new Neuron(inputs[i], randWeights));
-                }
-                else
-                neurons.Add(new Neuron(randWeights));
-            }
         }
         //First sums up inputs, uses a squash function such as sigmoid to make values between 0 and 1.
         //Sets that as the output of the neuron.
@@ -52,7 +58,22 @@ namespace forfun
             {
                 if (layer.position == layerList.Count-1)
                 {
-                    //Only happens if on the final layer. All inputs/outputs have been calculated. need to use error function now.
+                    //Only happens if on the final layer.
+                    double[] transfer = new double[layer.neurons.Count];
+                    int count = 0;
+                    foreach (var item in layerList[iter].neurons)
+                    {
+
+                        transfer[count] = item.output;
+                        count++;
+                    }
+                    transfer =   Neuron.softMax(transfer);
+
+                    for (int i = 0; i < transfer.Length; i++)
+                    {
+                        layerList[iter].neurons[i].output = transfer[i];
+                    }
+
                     break;
                 }
                 iter++;
@@ -69,6 +90,11 @@ namespace forfun
                         inputSum += neuron.output * neuron.weights[w]; 
                     }
                     layerList[iter].neurons[w].input = inputSum;
+                    if (iter == layer.numLayers.Count - 1)
+                    {
+                        layerList[iter].neurons[w].output = inputSum;
+                        continue;
+                    }
                     layerList[iter].neurons[w].output = Neuron.SquashFunction(inputSum);
                 }
               
@@ -86,7 +112,7 @@ namespace forfun
                 totalError += Neuron.ErrorFunction(layerList.Last().neurons[i].output,actuals[i]);
                 
             }
-            Console.WriteLine(totalError);
+           Console.Out.WriteLine(totalError);
             //For now only one hidden layer is allowed. This  first loop calcs the hidden layer weights.
             for (int n = 0; n < (layerList[2].neurons.Count); n++)
             {
@@ -96,10 +122,10 @@ namespace forfun
                 {
                    
                     double current = Neuron.Derivative_TotalError_WRT_Output(actuals[n], output);
-                    current = current * Neuron.Derivative_Output_WRT_TotalInput(output);
+                    current = current * Neuron.SoftMaxDerivative(output);
                     
                  
-                    current = current * Neuron.Derivative_TotalInput_WRT_Weight(layerList[2].neurons[n].output);
+                    current = current * Neuron.Derivative_TotalInput_WRT_Weight(layerList[1].neurons[w].output);
                     storageList[1].neurons[w].weights[n] -= current*learnRate;
                 }
 
@@ -116,8 +142,8 @@ namespace forfun
                     {
                         double output = layerList[2].neurons[s].output;
                         double current = Neuron.Derivative_TotalError_WRT_Output(actuals[s], output);
-                        current = current * Neuron.Derivative_Output_WRT_TotalInput(output);
-                        current = current * layerList[1].neurons[f].weights[s];
+                        current = current * Neuron.SoftMaxDerivative(output);
+                        current = current * layerList[1].neurons[i].weights[s];
                         totalErrors += current;
 
                     }

@@ -10,16 +10,19 @@ namespace forfun
     {
         static void Main(string[] args)
         {
-            double[] inputs = { 0.2, 0.54, 0.73 };
-            double[] actuals = { 0.01, 0.99 };
+            
+            Data.readTestCSV();
+            Data.testCaseStatistics();
+            double[] inputs = Data.normalcases[0].key;
+            double[] actuals = Data.normalcases[0].value;
             List<int> numLayers = new List<int>();
             List<double> actualValues = new List<double>();
             List<Layer> layerList = new List<Layer>();
 
             Layer myLayer = new Layer();
-            numLayers.Add(3);
-            numLayers.Add(3);
-            numLayers.Add(2);
+            numLayers.Add(784);
+            numLayers.Add(15);
+            numLayers.Add(10);
             for (int i = 0; i < numLayers.Count; i++)
             {
                 if (i == 0)
@@ -31,10 +34,15 @@ namespace forfun
                 else
                     layerList.Add(new Layer(numLayers, i, null));
             }
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < Data.normalcases.Count; i++)
             {
-                myLayer.FeedForward(layerList);
-                myLayer.BackPropagation(layerList, actuals);
+                for (int j = 0; j < 5 ; j++)
+                {
+                    layerList[0].input = Data.normalcases[i].key;
+                    myLayer.FeedForward(layerList);
+                    myLayer.BackPropagation(layerList, Data.normalcases[i].value);
+                }
+              
             }
             Console.WriteLine(layerList[2].neurons[0].output);
             Console.ReadLine();
