@@ -31,10 +31,10 @@ namespace forfun
                     if (position == 0)
                     {
 
-                        neurons.Add(new Neuron(inputs[i], Neuron.RandomWeights(numLayers[position])));
+                        neurons.Add(new Neuron(inputs[i], Neuron.RandomWeights(numLayers[position+1])));
                     }
                     else
-                        neurons.Add(new Neuron(Neuron.RandomWeights(numLayers[position])));
+                        neurons.Add(new Neuron(Neuron.RandomWeights(numLayers[position+1])));
                 }
             }
             else
@@ -51,7 +51,7 @@ namespace forfun
         //First sums up inputs, uses a squash function such as sigmoid to make values between 0 and 1.
         //Sets that as the output of the neuron.
 
-        public void FeedForward(List<Layer> layerList)
+        public void FeedForward(ref List<Layer> layerList)
         {
             int iter = 0;
             foreach (var layer in layerList)
@@ -77,6 +77,7 @@ namespace forfun
                     break;
                 }
                 iter++;
+
                 if (iter >= layer.numLayers.Count)
                 {
                     iter = layer.numLayers.Count-1;
@@ -86,9 +87,11 @@ namespace forfun
                     double inputSum = 0;
                     foreach (var neuron in layer.neurons)
                     {
+                        
                         //Summation of Wi + Ii for all neurons connecting to another neuron.
                         inputSum += neuron.output * neuron.weights[w]; 
                     }
+                    Console.Out.WriteLine(inputSum);
                     layerList[iter].neurons[w].input = inputSum;
                     if (iter == layer.numLayers.Count - 1)
                     {
@@ -100,7 +103,7 @@ namespace forfun
               
             }
         }
-        public void BackPropagation(List<Layer> layerList, double[] actuals)
+        public void BackPropagation(ref List<Layer> layerList, ref double[] actuals)
         {
             double learnRate = 0.5;
             //Creates a storage container for weights
@@ -112,7 +115,8 @@ namespace forfun
                 totalError += Neuron.ErrorFunction(layerList.Last().neurons[i].output,actuals[i]);
                 
             }
-           Console.Out.WriteLine(totalError);
+
+           //Console.Out.WriteLine(totalError);
             //For now only one hidden layer is allowed. This  first loop calcs the hidden layer weights.
             for (int n = 0; n < (layerList[2].neurons.Count); n++)
             {
@@ -126,7 +130,7 @@ namespace forfun
                     
                  
                     current = current * Neuron.Derivative_TotalInput_WRT_Weight(layerList[1].neurons[w].output);
-                    storageList[1].neurons[w].weights[n] -= current*learnRate;
+                    storageList[1].neurons[w].weights[n] += current*learnRate;
                 }
 
             }
@@ -155,6 +159,23 @@ namespace forfun
                 }
             }
             layerList = storageList;
+        }
+
+        public  int CalculateAccuracy(List<Layer> layerList)
+        {
+            FeedForward(ref layerList);
+            double highest = 0;
+            int position = 0;
+            for (int i = 0; i < layerList[2].neurons.Count; i++)
+
+            {
+                if (layerList[2].neurons[i].output > highest)
+                {
+                    highest = layerList[2].neurons[i].output;
+                    position = i;
+                }
+            }
+            return position;
         }
 
     }

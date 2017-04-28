@@ -59,6 +59,10 @@ namespace forfun
                 for (int j = 0; j < testcases[0].key.Length; j++)
                 {
                     norm.key[j] = testcases[i].key[j] / 255;
+                    if (norm.key[j]==0)
+                    {
+                        norm.key[j] = 0.00390625;
+                    }
                 }
                 normalcases.Add(norm);
             }

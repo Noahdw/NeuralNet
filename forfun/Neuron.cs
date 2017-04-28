@@ -96,7 +96,7 @@ namespace forfun
             
                 for (int r = 0; r < runs; r++)
                 {
-                    randWeights.Add(rand.NextDouble());
+                    randWeights.Add(rand.NextDouble()/100);
                 }
 
             return randWeights;

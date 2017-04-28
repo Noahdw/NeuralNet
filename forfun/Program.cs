@@ -18,10 +18,11 @@ namespace forfun
             List<int> numLayers = new List<int>();
             List<double> actualValues = new List<double>();
             List<Layer> layerList = new List<Layer>();
+            int testdataCount = 5000;//Data.normalcases.Count
 
             Layer myLayer = new Layer();
             numLayers.Add(784);
-            numLayers.Add(15);
+            numLayers.Add(50);
             numLayers.Add(10);
             for (int i = 0; i < numLayers.Count; i++)
             {
@@ -34,17 +35,33 @@ namespace forfun
                 else
                     layerList.Add(new Layer(numLayers, i, null));
             }
-            for (int i = 0; i < Data.normalcases.Count; i++)
+            for (int i = 0; i < testdataCount; i++)
             {
-                for (int j = 0; j < 5 ; j++)
+                //Console.WriteLine(i);
+                for (int j = 0; j < 1; j++)
                 {
                     layerList[0].input = Data.normalcases[i].key;
-                    myLayer.FeedForward(layerList);
-                    myLayer.BackPropagation(layerList, Data.normalcases[i].value);
+                    myLayer.FeedForward(ref layerList);
+                    myLayer.BackPropagation(ref layerList, ref Data.normalcases[i].value);
                 }
               
             }
-            Console.WriteLine(layerList[2].neurons[0].output);
+            double correct = 0;
+
+            for (int i = 0; i < testdataCount; i++)
+            {
+               
+                layerList[0].input = Data.normalcases[i].key;
+                int outputValue =  myLayer.CalculateAccuracy(layerList);
+                int actual = Array.IndexOf(Data.normalcases[i].value, 1);
+                if (outputValue == actual)
+                {
+                    correct++;
+                }
+
+            }
+            correct = correct / testdataCount * 100;
+            Console.WriteLine(correct + " %");
             Console.ReadLine();
         }
 
