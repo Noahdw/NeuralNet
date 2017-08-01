@@ -1,0 +1,1 @@
+This is a neural net developed by scratch to train with the MNIST hand writing data. It doesn't actually work - 10% accuracy :( - but it is just one correct softmax derivative away from possible working.
